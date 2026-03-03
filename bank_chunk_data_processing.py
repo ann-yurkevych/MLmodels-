@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import opendatasets as od
-import warnings
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
@@ -17,8 +16,6 @@ from sklearn.model_selection import (
 )
 from sklearn import tree
 from sklearn.impute import SimpleImputer
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import export_text, plot_tree
 from sklearn.metrics import roc_curve, auc
 from typing import Any, Dict, List
 
@@ -209,8 +206,7 @@ def preprocess_data(df: pd.DataFrame) -> Dict[str, Any]:
     X_validation, y_validation = extract_target(X_validation, "Exited")
 
     # drop categorical columns which don't serve any meaningful value
-    drop_cols = ["id", "CustomerId", "Surname"]
-    X_train, X_validation= drop_columns_splits(X_train, X_validation, drop_cols)
+    X_train, X_validation= drop_columns_splits(X_train, X_validation, ["id", "CustomerId", "Surname"])
 
     # encode categorical features
     X_train, X_validation, encoder, categorical_features = encode_splits_categories(X_train, X_validation)
@@ -235,9 +231,7 @@ def preprocess_test_data(df_test: pd.DataFrame, scaler, encoder, input_features:
     """
   
     X_test = df_test.copy()
-
-    drop_cols = ["id", "CustomerId", "Surname"]
-    X_test, _ = drop_columns_splits(X_test, X_test, drop_cols) 
+    X_test, _ = drop_columns_splits(X_test, X_test, ["id", "CustomerId", "Surname"]) 
 
     categorical_features = list(encoder.feature_names_in_) 
 
