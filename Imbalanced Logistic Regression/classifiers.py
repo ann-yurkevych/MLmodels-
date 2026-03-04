@@ -6,4 +6,5 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.multiclass import OneVsRestClassifier, OneVsOneClassifier 
 from sklearn.tree import DecisionTreeClassifier
 
-def base_Logistic_regression()
+def base_Logistic_regression(X):
+    return

@@ -8,6 +8,7 @@ from sklearn.model_selection import (
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OrdinalEncoder, OneHotEncoder, MinMaxScaler
+from sklearn.impute import SimpleImputer
 
 def split_train_test(df: pd.DataFrame, target: str, test_size: float = 0.2, random_state: int = 42):
   """
@@ -277,3 +278,4 @@ def scale_numeric_test(X_test_encoded: pd.DataFrame):
   X_test_scaled = pd.DataFrame(scaler.transform(X_test_encoded), columns=X_test_encoded.columns, index=X_test_encoded.index)
 
   return X_test_scaled
+
