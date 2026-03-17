@@ -3,12 +3,41 @@ import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
+from sqlalchemy import create_engine 
 
-def load_data(datasets_path: str, filename: str):
-  df = pd.read_csv(datasets_path + '/' + filename, parse_dates=["time"], index_col="time")
-  df.index = pd.to_datetime(df.index)
-  df.sort_index(inplace=True)
-  return df
+def load_data(datasets_path: str, file_type: str = "csv", sql_query: str = None, connection: str = None, sep: str = None):
+    """
+    Reads the following formats: csv, json, xlsx, sql.
+    Args:
+        datasets_path: Path to the file or database table name.
+        file_type: File format - 'csv', 'json', 'xlsx', or 'sql'.
+        sql_query (str): SQL query string (required for SQL type).
+        connection: Database connection string (required for SQL type).
+        sep: Delimiter to use (csv only).
+    Returns:
+        pd.DataFrame: Loaded data as a DataFrame.
+    """
+    if file_type == "csv":
+        df = pd.read_csv(datasets_path, sep=sep)
+    elif file_type == "json":
+        df = pd.read_json(datasets_path)         
+    elif file_type == "xlsx":
+        df = pd.read_excel(datasets_path)         
+    elif file_type == "sql":
+        if connection is None:
+            raise ValueError("A database connection string 'connection' is required for SQL type.")
+        if sql_query is None:
+            raise ValueError("A 'sql_query' is required for SQL type.")
+        engine = create_engine(connection)
+        with engine.connect() as conn:          
+            df = pd.read_sql(sql_query, connection=conn)
+    else:
+        raise ValueError(f"Unsupported file type: '{file_type}'. Choose from: csv, json, xlsx, sql.")
+    
+    print(df.head())
+    return df
+
+
 
 def extract_target(df: pd.DataFrame, target: str):
   input_features = df.drop(columns=[target]).copy()
@@ -68,3 +97,6 @@ def scale_numeric_test(X_test_encoded: pd.DataFrame, scaler: StandardScaler):
 
   return X_test_scaled
 
+
+
+   

@@ -17,3 +17,6 @@ from preprocessing import (
     scale_numeric_test
 )
 
+print("Loading the data")
+
+raw_df = load_data("data/bank-additional-full.csv")
