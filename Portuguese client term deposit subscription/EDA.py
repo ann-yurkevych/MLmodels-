@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 # SHAPE AND DATA TYPES
 def type_shape_stats(df: pd.DataFrame):
@@ -33,11 +34,26 @@ def missing_values_summary(df: pd.DataFrame):
 # Skewness, kurtosis, percentiles
 
 # DISTRIBUTIONS, OUTLIERS
+# look for requirements reference in the outliers
 
 # histograms, boxplots, violin plots, Z-score, IQR plot
 # conduct normality tests: Shapiro-Wilk, D'Agostino-Pearson, plot Q-Q plots
 
 # test for specific distribution: conduct Anderson-Darling
+
+# CATEGORICAL ANALYSIS
+
+# CORRELATIONS
+# heatmaps Cramér's V(only for categorical variables)
+"""
+Cramér's V - variable association
+Chi-Square test
+Cramér's V = 
+No association with target → likely useless feature
+High association with target + low association with other features → ideal feature
+High association with another feature → redundant, pick one
+"""
+
 
 # MULTICOLLINEARITY DETECTION: VIF
 # build two correlation matrices: correlation feature vs. feature, correlation feature vs. target
@@ -60,31 +76,79 @@ def features_correlation(df: pd.DataFrame, corr_features: list):
             square=True, # cells square-shaped
             linewidths=1,  
             cbar_kws={'label': 'Correlation coefficient'})
-
+  plt.xticks(rotation=45, ha='right')
   plt.title('Correlation between features', fontsize=16, pad=20)
   plt.tight_layout()
   plt.show()
+
+def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float = 0.7):
+
+    corr_matrix = df[corr_features].corr()
+    # avoid duplicate pairs : (A, B) == (B, A) 
+    upper_triangle = corr_matrix.where(
+        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
+    )
+    
+    high_corr_pairs = [
+        (col, row, upper_triangle.loc[row, col])
+        for col in upper_triangle.columns
+        for row in upper_triangle.index
+        if abs(upper_triangle.loc[row, col]) >= threshold
+    ]
+    
+    if not high_corr_pairs:
+        print(f"No feature pairs with correlation >= {threshold}")
+        return
+    
+    print(f"Highly correlated feature pairs\n")
+    for feat1, feat2, corr_val in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
+        print(f"  {feat1} <-> {feat2}: {corr_val:.2f}")
 
 """
 When you spot features with correlation -> plot a scatter plot for each correlation you find. 
     - Points form a straight line → truly redundant
     - Points are scattered despite high correlation → might still carry different info
     """
+# print out pairs which are highly correlated
+def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float = 0.7):
 
-# CATEGORICAL ANALYSIS
+    corr_matrix = df[corr_features].corr()
+    
+    # avoid duplicate pairs : (A, B) == (B, A) 
+    upper_triangle = corr_matrix.where(
+        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
+    )
+    
+    high_corr_pairs = [
+        (col, row, upper_triangle.loc[row, col])
+        for col in upper_triangle.columns
+        for row in upper_triangle.index
+        if abs(upper_triangle.loc[row, col]) >= threshold
+    ]
+    
+    if not high_corr_pairs:
+        print(f"No feature pairs with correlation >= {threshold}")
+        return
+    
+    print(f"Highly correlated feature pairs (|corr| >= {threshold}):\n")
+    for feat1, feat2, corr_val in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
+        print(f"  {feat1} <-> {feat2}: {corr_val:.2f}")
 
-# CORRELATIONS
-# heatmaps, Pearsons correlation, Cramér's V(only for categorical variables)
-"""
-Cramér's V - variable association
-Chi-Square test
-Cramér's V = 
-No association with target → likely useless feature
-High association with target + low association with other features → ideal feature
-High association with another feature → redundant, pick one
-"""
-
-
+def check_multicollinearity(df: pd.DataFrame, features: list):
+    # variance inflamation factor is used to measure multicollinearity
+    X = df[features].dropna()
+    
+    vif = pd.DataFrame({
+        'feature': features,
+        'VIF': [variance_inflation_factor(X.values, i) for i in range(len(features))]
+    })
+    
+    vif['severity'] = pd.cut(vif['VIF'], 
+                              bins=[0, 5, 10, float('inf')], 
+                              labels=['Acceptable', 'High', 'Severe'])
+    
+    return vif.sort_values('VIF', ascending=False).reset_index(drop=True)
+    
 
 
 # TARGET VARIABLE ANALYSIS
