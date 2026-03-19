@@ -87,5 +87,7 @@ def drop_columns(df: pd.DataFrame, columns_to_drop: list):
 
 # functions to handle class imbalance: SMOTE-Tomek + Stratified K-fold
 
-
-   
+def numeric_categorical_features(df: pd.DataFrame, target: str = 'y'):
+    # returns a list of categorical + numeric features in two different lists
+    df_features = df.drop(columns=[target])
+    return df_features.select_dtypes(include=["number"]).columns.tolist(), df_features.select_dtypes(include=["object"]).columns.tolist()

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # SHAPE AND DATA TYPES
 def type_shape_stats(df: pd.DataFrame):
@@ -8,7 +9,7 @@ def type_shape_stats(df: pd.DataFrame):
     print("dataframe types:", df.dtypes)
 
 def descriptive_stats(df: pd.DataFrame):
-    print(df.describe())
+    print(df.describe().T)
 
 
 # MISSING VALUES STATISTICS: 
@@ -39,6 +40,36 @@ def missing_values_summary(df: pd.DataFrame):
 # test for specific distribution: conduct Anderson-Darling
 
 # MULTICOLLINEARITY DETECTION: VIF
+# build two correlation matrices: correlation feature vs. feature, correlation feature vs. target
+# if feature is highly correlated with another feature -> bad 
+# if feature is 
+# If age and experience are 95% correlated, they're essentially saying the same thing. This is called multicollinearity 
+
+# correlation between features: if 0.7-0.9 -> check for multicollinearity
+def features_correlation(df: pd.DataFrame, corr_features: list):
+  # prints out the correlation between features 
+  # features with corelation 0.7-0.9 are considered high correlation
+
+  corr_matrix = df[corr_features].corr()
+  plt.figure(figsize=(12, 10))
+  sns.heatmap(corr_matrix,
+            annot=True,  # show correlation values
+            fmt='.1f',   # Format numbers to 1 decimal place
+            cmap='YlGnBu',
+            center=0,    # Center at 0
+            square=True, # cells square-shaped
+            linewidths=1,  
+            cbar_kws={'label': 'Correlation coefficient'})
+
+  plt.title('Correlation between features', fontsize=16, pad=20)
+  plt.tight_layout()
+  plt.show()
+
+"""
+When you spot features with correlation -> plot a scatter plot for each correlation you find. 
+    - Points form a straight line → truly redundant
+    - Points are scattered despite high correlation → might still carry different info
+    """
 
 # CATEGORICAL ANALYSIS
 
