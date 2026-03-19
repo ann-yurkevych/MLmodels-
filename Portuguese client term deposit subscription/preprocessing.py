@@ -85,6 +85,7 @@ def drop_columns(df: pd.DataFrame, columns_to_drop: list):
 
 
 
+# functions to handle class imbalance: SMOTE-Tomek + Stratified K-fold
 
 
    
