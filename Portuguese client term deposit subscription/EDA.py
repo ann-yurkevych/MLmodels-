@@ -29,13 +29,69 @@ def missing_values_summary(df: pd.DataFrame):
     return summary
 
 # missing pattern type: MCAR, MAR, and MNAR
+"""
+1. MCAR = Missing Completely At Random. 
+2. MAR = Missing At Random
+3. MNAR = Missing Not At Random
+"""
+
+def missing_pattern_type(df: pd.DataFrame, target: str = 'y') :
+    return
+# Skewness, kurtosis
+def skewness_kurtosis(df: pd.DataFrame, features: list) -> pd.DataFrame:
+    """
+    Skewness: measures asymmetry of distribution
+        - 0          : perfectly symmetric
+        - > 1 or < -1: highly skewed -> consider log transform
+        - 0.5 to 1   : moderately skewed
+ 
+    Kurtosis: measures tail heaviness
+        - 3 (excess=0): normal distribution
+        - > 3          : heavy tails, more outliers
+        - < 3          : light tails
+    """
+    results = []
+    for col in features:
+        results.append({
+            'feature': col,
+            'skewness': round(df[col].skew(), 3),
+            'kurtosis': round(df[col].kurtosis(), 3),
+            'skew_flag': 'High skew' if abs(df[col].skew()) > 1 else ''
+        })
+ 
+    return pd.DataFrame(results).sort_values('skewness', key=abs, ascending=False)
+
+# percentiles
+def percentiles_summary(df: pd.DataFrame, features: list):
+    """Returns 1, 5, 25, 50, 75, 95, 99 percentiles per feature."""
+    percentiles = [0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99]
+    return df[features].quantile(percentiles).T.rename(
+        columns={p: f'p{int(p*100)}' for p in percentiles}
+    )
+ 
+# DISTRIBUTIONS
+def plot_histograms(df: pd.DataFrame, features: list, bins: int = 30):
+    n = len(features)
+    cols = 3
+    rows = (n + cols - 1) // cols
+    fig, axes = plt.subplots(rows, cols, figsize=(16, rows * 4))
+    axes = axes.flatten()
+
+    for i, col in enumerate(features):
+        axes[i].hist(df[col].dropna(), bins=bins, edgecolor='white', color='steelblue', alpha=0.7)
+        axes[i].set_title(f'{col}\nskew={df[col].skew():.2f}', fontsize=10, fontweight='bold')
+        axes[i].set_xlabel(col)
+        axes[i].set_ylabel('Count')
+
+    for j in range(i + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    plt.suptitle('Feature Distributions', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.show()
 
 
-# Skewness, kurtosis, percentiles
-
-# DISTRIBUTIONS, OUTLIERS
-# look for requirements reference in the outliers
-
+# OUTLIERS
 # histograms, boxplots, violin plots, Z-score, IQR plot
 # conduct normality tests: Shapiro-Wilk, D'Agostino-Pearson, plot Q-Q plots
 
@@ -104,11 +160,7 @@ def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float =
     for feat1, feat2, corr_val in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
         print(f"  {feat1} <-> {feat2}: {corr_val:.2f}")
 
-"""
-When you spot features with correlation -> plot a scatter plot for each correlation you find. 
-    - Points form a straight line → truly redundant
-    - Points are scattered despite high correlation → might still carry different info
-    """
+
 # print out pairs which are highly correlated
 def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float = 0.7):
 
