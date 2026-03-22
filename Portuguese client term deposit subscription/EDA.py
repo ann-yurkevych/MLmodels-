@@ -28,15 +28,76 @@ def missing_values_summary(df: pd.DataFrame):
     
     return summary
 
-# missing pattern type: MCAR, MAR, and MNAR
+# Correlation between missing values at the same time in different features
+# 1. Does 'unknown' occurs at the same time in multiple columns? Is there any connection between unknown in one column and another?
 """
-1. MCAR = Missing Completely At Random. 
-2. MAR = Missing At Random
-3. MNAR = Missing Not At Random
+If the same rows tend to have "unknown" in multiple columns simultaneously,
+that pattern itself is informative — it might mean a specific subgroup of people refused to answer, which could correlate with the target.
 """
+def unknown_cooccurrence_matrix(df):
+    """
+    For each pair of categorical columns, count how many rows
+    have 'unknown' in BOTH columns simultaneously.
+    Returns a heatmap showing the co-occurrence counts (and %).
+    """
+    cat_cols = df.select_dtypes(include='object').columns.tolist()
+    unknown_mask = (df[cat_cols] == 'unknown').astype(int)
 
-def missing_pattern_type(df: pd.DataFrame, target: str = 'y') :
-    return
+    # Co-occurrence matrix: dot product gives count of rows
+    # where both columns are 'unknown' at the same time
+    cooc = unknown_mask.T @ unknown_mask  # shape: (n_cols, n_cols)
+
+    # Convert to % of total rows for easier interpretation
+    cooc_pct = (cooc / len(df)) * 100
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    sns.heatmap(cooc, annot=True, fmt='d', cmap='YlOrRd',
+                ax=axes[0], linewidths=0.5, square=True,
+                cbar_kws={'label': 'rows'})
+    axes[0].set_title('Unknown co-occurrence (row counts)')
+    plt.xticks(rotation=45, ha='right')
+    sns.heatmap(cooc_pct, annot=True, fmt='.1f', cmap='YlOrRd',
+                ax=axes[1], linewidths=0.5, square=True,
+                cbar_kws={'label': '% of rows'})
+    
+    axes[1].set_title('Unknown co-occurrence (% of dataset)')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
+    return cooc, cooc_pct
+
+# education, housing, loan: check behavior with target variable 
+def plot_unknown_vs_known(df: pd.DataFrame, target_col: str, cols: list):
+    fig, axes = plt.subplots(1, len(cols), figsize=(14, 5))
+    
+    target = df[target_col]
+    overall = target.mean() * 100
+    
+    for ax, col in zip(axes, cols):
+        is_unknown = df[col] == 'unknown'
+        rate_unknown = target[is_unknown].mean() * 100
+        rate_known   = target[~is_unknown].mean() * 100
+        
+        sns.barplot(x=['unknown', 'known'], y=[rate_unknown, rate_known],
+                    palette=['#e74c3c', '#3498db'], ax=ax)
+        
+        ax.set_title(col, fontsize=13, fontweight='bold')
+        ax.set_ylabel('Subscription rate (%)' if ax == axes[0] else '')
+        ax.set_ylim(0, 25)
+        
+        for bar, rate in zip(ax.patches, [rate_unknown, rate_known]):
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.3,
+                    f'{rate:.1f}%', ha='center', fontsize=11, fontweight='bold')
+        
+        ax.axhline(y=overall, color='gray', linestyle='--', linewidth=1, alpha=0.7)
+        ax.text(1.1, overall + 0.3, f'avg {overall:.1f}%', fontsize=9, color='gray')
+    
+    sns.despine()
+    plt.suptitle('Subscription rate: unknown vs known', fontsize=14, y=1.02)
+    plt.tight_layout()
+    plt.show()
+
 # Skewness, kurtosis
 def skewness_kurtosis(df: pd.DataFrame, features: list) -> pd.DataFrame:
     """
