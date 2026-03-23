@@ -338,7 +338,3 @@ You need it when you want to compare categorical variables with some continuous 
 
 # make conclusions/assumptions which features influence target variable y
 
-"""ADDITIONAL CONCLUSIONS TO MAKE
-which features to encode and how, which to scale, which to drop, 
-which to transform, and which models are reasonable given what you found.
-"""

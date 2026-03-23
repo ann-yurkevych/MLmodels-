@@ -10,9 +10,7 @@ from sklearn.model_selection import (
     StratifiedKFold,
     KFold
 ) 
-from EDA import (
-    decriptive_stats
-)
+
 
 def load_data(datasets_path: str, file_type: str = "csv", sql_query: str = None, connection: str = None, sep: str = None):
     """
