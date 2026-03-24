@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from scipy.stats import chi2_contingency
 
 # SHAPE AND DATA TYPES
 def type_shape_stats(df: pd.DataFrame):
@@ -165,9 +166,6 @@ def plot_histograms(df: pd.DataFrame, features: list, bins: int = 30):
 
 
 # MULTICOLLINEARITY DETECTION: VIF
-# build two correlation matrices: correlation feature vs. feature, correlation feature vs. target
-# if feature is 
-# If age and experience are 95% correlated, they're essentially saying the same thing. This is called multicollinearity 
 
 def features_correlation(df: pd.DataFrame, corr_features: list):
   # prints out the correlation between features 
@@ -228,8 +226,59 @@ def check_multicollinearity(df: pd.DataFrame, features: list):
     return vif.sort_values('VIF', ascending=False).reset_index(drop=True)
     
 
+# Association between categorical features 
+def cramers_v(x, y):
+    confusion_matrix = pd.crosstab(x, y)
+    chi2 = chi2_contingency(confusion_matrix)[0]
+    n = confusion_matrix.sum().sum()
+    k, r = confusion_matrix.shape
+    return np.sqrt(chi2 / (n * (min(k, r) - 1)))
 
-# TARGET VARIABLE ANALYSIS
+def categorical_correlation_with_target(df: pd.DataFrame, cat_features: list, target: str):
+    results = []
+    for feature in cat_features:
+        v = cramers_v(df[feature], df[target])
+        results.append({'feature': feature, 'cramers_v': v})
+    
+    results_df = pd.DataFrame(results).sort_values('cramers_v', ascending=True)
+
+    colors = ['#2ecc71' if v >= 0.5 else '#f39c12' if v >= 0.1 else '#e74c3c' 
+              for v in results_df['cramers_v']]
+
+    plt.figure(figsize=(8, len(cat_features) * 0.4 + 2))
+    plt.barh(results_df['feature'], results_df['cramers_v'], color=colors)
+    plt.xlabel("Cramér's V")
+    plt.title(f'Categorical Feature Association with "{target}"', fontsize=13)
+    plt.xlim(0, 1)
+    plt.tight_layout()
+    plt.show()
+
+    return results_df
+
+def categorical_features_correlation(df: pd.DataFrame, cat_features: list):
+    n = len(cat_features)
+    matrix = pd.DataFrame(np.zeros((n, n)), index=cat_features, columns=cat_features)
+
+    for f1 in cat_features:
+        for f2 in cat_features:
+            matrix.loc[f1, f2] = cramers_v(df[f1], df[f2])
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(matrix,
+                annot=True,
+                fmt='.2f',
+                cmap='YlGnBu',
+                vmin=0, vmax=1,
+                square=True,
+                linewidths=1,
+                cbar_kws={'label': "Cramér's V"})
+    plt.xticks(rotation=45, ha='right')
+    plt.title("Cramér's V between Categorical Features", fontsize=13, pad=20)
+    plt.tight_layout()
+    plt.show()
+
+    return matrix
+
 
 # distribution of target variable: histograms to spot class imbalance
 def class_distribution_plot(df: pd.DataFrame, target: str = 'y'):
@@ -259,46 +308,6 @@ def class_distribution_plot(df: pd.DataFrame, target: str = 'y'):
     plt.tight_layout()
     plt.show()
 
-# feature vs target: scatter plot, box plot per class - how each feature relates to target variable
-
-# cross-tabulation relation from category to target variable
-"""
-The bigger the deviation from baseline, the more useful that category is
-
-"""
-
-
-"""
-* remember to apply SMOTE only on training set, not validation or test
-In this section make conclusion about if you need to use any technoiques to handle class imbalance:
-1. 
-2. SMOTE: SMOTE(only on numeric), SMOTENC(for numeric + categorical), SMOTEN(categorical), SMOTE-Tomek(numeric, but )
-3. class_weight = "balanced"
-
-Also, based on TARGET VARIABLE ANALYSIS, you decide which performance metrics to use
-if your target is heavily imbalanced (95% class 0, 5% class 1), accuracy is misleading. You'd use F1, ROC-AUC, or precision-recall instead.
-
-"""
-
-# INTERACTION TERMS check
-"""
-interaction term: the effect of feature A on the target depends on the value of feature B.
-if you spot an interaction term -> for linear models you need to create manually an interaction term
-"""
-
-
-
-
-
-"""
-1. Normality tests: is the data normally distributed? 
-2. Variance Equality Tests: do my groups have equal variance? - it's only for categorical variables
-Levene's test — robust to non-normality
-Bartlett's test — assumes normality
-You need it when you want to compare categorical variables with some continuous variable: 
-
-3. 
-"""
 
 
 # make conclusions/assumptions which features influence target variable y
