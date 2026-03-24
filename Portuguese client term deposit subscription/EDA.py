@@ -162,23 +162,13 @@ def plot_histograms(df: pd.DataFrame, features: list, bins: int = 30):
 
 # CORRELATIONS
 # heatmaps Cramér's V(only for categorical variables)
-"""
-Cramér's V - variable association
-Chi-Square test
-Cramér's V = 
-No association with target → likely useless feature
-High association with target + low association with other features → ideal feature
-High association with another feature → redundant, pick one
-"""
 
 
 # MULTICOLLINEARITY DETECTION: VIF
 # build two correlation matrices: correlation feature vs. feature, correlation feature vs. target
-# if feature is highly correlated with another feature -> bad 
 # if feature is 
 # If age and experience are 95% correlated, they're essentially saying the same thing. This is called multicollinearity 
 
-# correlation between features: if 0.7-0.9 -> check for multicollinearity
 def features_correlation(df: pd.DataFrame, corr_features: list):
   # prints out the correlation between features 
   # features with corelation 0.7-0.9 are considered high correlation
@@ -219,33 +209,8 @@ def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float =
     
     print(f"Highly correlated feature pairs\n")
     for feat1, feat2, corr_val in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
-        print(f"  {feat1} <-> {feat2}: {corr_val:.2f}")
+        print(f"  {feat1} correlates with {feat2}: {corr_val:.2f}")
 
-
-# print out pairs which are highly correlated
-def high_corr_features(df: pd.DataFrame, corr_features: list, threshold: float = 0.7):
-
-    corr_matrix = df[corr_features].corr()
-    
-    # avoid duplicate pairs : (A, B) == (B, A) 
-    upper_triangle = corr_matrix.where(
-        np.triu(np.ones(corr_matrix.shape), k=1).astype(bool)
-    )
-    
-    high_corr_pairs = [
-        (col, row, upper_triangle.loc[row, col])
-        for col in upper_triangle.columns
-        for row in upper_triangle.index
-        if abs(upper_triangle.loc[row, col]) >= threshold
-    ]
-    
-    if not high_corr_pairs:
-        print(f"No feature pairs with correlation >= {threshold}")
-        return
-    
-    print(f"Highly correlated feature pairs (|corr| >= {threshold}):\n")
-    for feat1, feat2, corr_val in sorted(high_corr_pairs, key=lambda x: abs(x[2]), reverse=True):
-        print(f"  {feat1} <-> {feat2}: {corr_val:.2f}")
 
 def check_multicollinearity(df: pd.DataFrame, features: list):
     # variance inflamation factor is used to measure multicollinearity
