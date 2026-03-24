@@ -7,9 +7,13 @@ import xgboost as xgb
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 from sklearn.ensemble import StackingClassifier, VotingClassifier
-from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.model_selection import StratifiedKFold, cross_val_score, RandomizedSearchCV
 from sklearn.metrics import f1_score
 import pandas as pd
+import numpy as np
+
+# HYPERPARAMETER TUNING: Randomized Search, Hyperopt: Bayesian Optimization: hyperparameters are stored in configurations.py
+# tuning is stored in hyperparameter_tuning file
 
 def base_decision_tree_model():
   return tree.DecisionTreeClassifier(random_state=42, class_weight='balanced')

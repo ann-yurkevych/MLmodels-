@@ -15,7 +15,8 @@ from preprocessing import (
     extract_target,
     split_train_test,
     encode_target, 
-    numeric_categorical_features
+    numeric_categorical_features,
+    drop_columns
 )
 
 print("Loading the data")
@@ -24,6 +25,9 @@ raw_df = load_data("data/bank-additional-full.csv")
 
 # encode target variable from str to num
 raw_df = encode_target(raw_df, 'y') 
+
+# drop features: based on conducted EDA in exporation.ipynb 
+raw_df = drop_columns() # add dropped columns
 
 # split dataset into train/test: 80/20
 X_train, X_test = split_train_test(raw_df, 'y')
@@ -58,7 +62,7 @@ preprocessor = ColumnTransformer(transformers=[
     ]), numeric_features),
     
     ("cat", Pipeline([
-        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("imputer", SimpleImputer(strategy="most_frequent")), # custom imputation will be used
         ("encoder", OneHotEncoder(handle_unknown="ignore"))
     ]), categorical_features)
     
