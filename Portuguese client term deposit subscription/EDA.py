@@ -187,7 +187,7 @@ def features_correlation(df: pd.DataFrame, corr_features: list):
   plt.figure(figsize=(12, 10))
   sns.heatmap(corr_matrix,
             annot=True,  # show correlation values
-            fmt='.1f',   # Format numbers to 1 decimal place
+            fmt='.2f',   # Format numbers to 1 decimal place
             cmap='YlGnBu',
             center=0,    # Center at 0
             square=True, # cells square-shaped
