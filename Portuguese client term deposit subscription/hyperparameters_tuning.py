@@ -6,7 +6,15 @@ from sklearn.metrics import accuracy_score
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 from sklearn.metrics import f1_score
+from sklearn.model_selection import RandomizedSearchCV
 
+# RANDOMIZED SEARCH tuning
+def randomized_search_cv():
+    clf = RandomizedSearchCV(logistic, distributions, random_state=0)
+    return
+
+
+# HYPEROPT: Bayesian Optimisation, used objective function inside of every boosting algorithm tuning
 def tune_xgb(X_train, y_train, X_val, y_val, max_evals=20):
     def objective(params):
         clf = xgb.XGBClassifier(
