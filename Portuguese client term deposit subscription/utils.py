@@ -47,7 +47,7 @@ def permutation_feature_importance(model, X, y):
  
     return feature_importance_df
 
-# 
+# THE IMPACT OF FEATURES ON PREDICTIONS
 def shap_summary(model, X_train):
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_train)
@@ -94,6 +94,7 @@ def shap_single_prediction(model, X_train, X_test, row_index=0):
         X_test.iloc[row_index]
     )
 
+# ANALYSE THE ERRORS MODEL MADE
 def analyze_errors(model, X_test, y_test):
     """
     Identifies and returns all test records where the model's prediction
