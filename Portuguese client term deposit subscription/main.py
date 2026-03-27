@@ -47,14 +47,18 @@ numeric_features, categorical_features = numeric_categorical_features(raw_df)
 
 # FunctionTransformer is used if you want to use custom functions in pipeline
 # to pass arguments to a function use kw_args = kw_args={'replace_this': 'unknown', 'with_this': 0})
-# -----------CODE EXAMPLE --------------
+
 # def replace_value(X, replace_this='unknown', with_this=np.nan):
 #     return pd.DataFrame(X).replace(replace_this, with_this)
 
 # FunctionTransformer(replace_value, kw_args={'replace_this': 'unknown', 'with_this': 0})
 
+# ColumnTransformer
+#  hyperparameter tuning across the whle pipeline
 
-# To handle unknown in the categories I use custom function from preprocessing.py and then 
+
+
+
 preprocessor = ColumnTransformer(transformers=[
     ("num", Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -67,3 +71,4 @@ preprocessor = ColumnTransformer(transformers=[
     ]), categorical_features)
     
 ], remainder="drop")
+
