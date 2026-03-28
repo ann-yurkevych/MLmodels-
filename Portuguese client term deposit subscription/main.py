@@ -53,12 +53,6 @@ numeric_features, categorical_features = numeric_categorical_features(raw_df)
 
 # FunctionTransformer(replace_value, kw_args={'replace_this': 'unknown', 'with_this': 0})
 
-# ColumnTransformer
-#  hyperparameter tuning across the whle pipeline
-
-
-
-
 preprocessor = ColumnTransformer(transformers=[
     ("num", Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -66,9 +60,31 @@ preprocessor = ColumnTransformer(transformers=[
     ]), numeric_features),
     
     ("cat", Pipeline([
-        ("imputer", SimpleImputer(strategy="most_frequent")), # custom imputation will be used
+        ("imputer", SimpleImputer(strategy="most_frequent")), 
         ("encoder", OneHotEncoder(handle_unknown="ignore"))
     ]), categorical_features)
     
-], remainder="drop")
+])
+
+"""PIPELINE
+1. Load the data. 
+2. Encode the target variable from string to numeric value. 
+3. Drop features (based on prior EDA). 
+4. Create new features if needed for the model.
+5. Divide dataset into training, test, validation using stratified train_test_split. 
+6. Extract target variable from each training, test, validation sets.
+
+STEPS 7-13 WILL BE DONE IN THE PIPELINE, using ColumnTransformer, FunctionTransformer
+
+7. Detect and impute missing values: no numeric missing values were detected, "unknown" categories will be replaced with SimpleImputer "most_frequent"
+8. Encode categorical variables. 
+9. Scale numeric variables (fit + transform only on training, transform on validation + test sets)
+10. Apply SMOTE techniques to handle class imbalance (only on the training data). 
+11. For each model train the model with hyperparameters.
+12. Pick the best hyperparameters (hyperparamters for each model with lowest validation error are the best for the model).
+13. Train the best model using hyperparameters.
+
+14. Evaluate on test set. 
+15. 
+"""
 
