@@ -7,12 +7,12 @@ from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 from sklearn.metrics import f1_score
 from sklearn.model_selection import RandomizedSearchCV
-from hyperparameters_tuning import params_grid_search
+from configurations import params_search
 
 
 # RANDOMIZED SEARCH tuning
-def randomized_search_cv(model, X_train, y_train, n_iter=20, cv=5):
-    clf = RandomizedSearchCV(estimator=model, param_distributions=params_grid_search, n_iter=n_iter, scoring='f1_weighted', cv=cv, random_state=0, n_jobs=-1, refit=True)
+def randomized_search_cv(model, model_name, X_train, y_train, n_iter=20, cv=5):
+    clf = RandomizedSearchCV(estimator=model, param_distributions=params_search[model_name], n_iter=n_iter, scoring='f1_weighted', cv=cv, random_state=0, n_jobs=-1, refit=True)
     clf.fit(X_train, y_train)
     return clf.best_estimator_, clf.best_params_
 

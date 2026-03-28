@@ -55,7 +55,7 @@ def voting_classifier_all_models(voting: str="soft"):
         ('logistic_regression', base_logistic_regression()),
         ('knn', base_KNeighborsClassifier()),
         ('xgboost', base_xgboost()),
-        ('lightgbm', base_xgboost()),
+        ('lightgbm', base_lightgbm()),
         ('catboost', base_catboost()),
     ]
     return VotingClassifier(estimators=estimators, voting=voting)
@@ -68,7 +68,7 @@ def compare_boosting_algorithms(X_train: pd.DataFrame, y_train, cv=5):
     """
     boosting_models = {
         'XGBoost':   base_xgboost(),
-        'LightGBM':  base_xgboost(),
+        'LightGBM':  base_lightgbm(),
         'CatBoost':  base_catboost(),
     }
     
