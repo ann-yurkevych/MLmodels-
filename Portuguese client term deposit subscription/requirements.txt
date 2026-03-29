@@ -1,0 +1,14 @@
+numpy==2.3.5
+pandas==2.3.3
+scikit-learn==1.8.0
+imbalanced-learn==0.14.1
+xgboost==3.2.0
+lightgbm==4.6.0
+catboost==1.2.10
+hyperopt==0.2.7
+matplotlib==3.10.7
+openpyxl==3.1.5
+scipy==1.16.3
+joblib
+mlflow==3.10.1
+shap==0.51.0
