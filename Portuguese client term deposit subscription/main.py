@@ -2,6 +2,7 @@ import mlflow
 import pandas as pd
 from imblearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTENC
+from imblearn.over_sampling import SMOTE
 from sklearn.pipeline import Pipeline as SklearnPipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
@@ -29,6 +30,8 @@ from classifiers import (
     base_catboost
 )
 
+from configurations import params_search
+from hyperparameters_tuning import randomized_search_cv
 
 """PIPELINE
 1. Load the data. 
@@ -63,7 +66,7 @@ raw_df = load_data("data/bank-additional-full.csv")
 raw_df = encode_target(raw_df, 'y') 
 
 # drop features: based on conducted EDA in exporation.ipynb 
-raw_df = drop_columns(['duration', 'emp.var.rate', 'nr.employed']) 
+raw_df = drop_columns(raw_df, ['duration', 'emp.var.rate', 'nr.employed']) 
 
 # split dataset into train/test: 80/20
 X_train, X_test = split_train_test(raw_df, 'y')
@@ -77,12 +80,88 @@ X_validation, y_validation = extract_target(X_validation, 'y')
 X_test, y_test = extract_target(X_test, 'y') 
 
 # determine numeric, categorical features
-numeric_features, categorical_features = numeric_categorical_features(raw_df)
+numeric_features, categorical_features = numeric_categorical_features(X_train)
 
 # indices for category columns
 columns_category_indices = get_categorical_indices(X_train, numeric_features)
 
 # PIPELINE STARTS # 
+
+models = {
+    'DecisionTree':         base_decision_tree_model(),
+    'KNN':                  base_KNeighborsClassifier(),
+    'LogisticRegression':   base_logistic_regression(),
+    'XGBoost':              base_xgboost(),
+    'CatBoostClassifier':   base_catboost(),
+    'LGBMClassifier':       base_lightgbm(),
+}
+
+
+def build_pipeline(model, numeric_features, categorical_features):
+    """
+    Builds a full imblearn Pipeline:
+    preprocessor → SMOTENC → model
+    
+    SMOTENC only fires during fit() — never during predict()
+    """
+
+    # --- Numeric transformer ---
+    numeric_transformer = SklearnPipeline(steps=[
+        ('imputer', SimpleImputer(strategy='median')),
+        ('scaler', StandardScaler())
+    ])
+
+    # --- Categorical transformer ---
+    categorical_transformer = SklearnPipeline(steps=[
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
+    ])
+
+    # --- ColumnTransformer: applies transformers to correct columns ---
+    preprocessor = ColumnTransformer(transformers=[
+        ('num', numeric_transformer, numeric_features),
+        ('cat', categorical_transformer, categorical_features)
+    ])
+
+    n_num = len(numeric_features)
+    n_cat_encoded = sum(...)  # see note below*
+    categorical_indices_after_ohe = list(range(n_num, n_num + n_cat_encoded))
+
+    smotenc = SMOTENC(
+        categorical_features=categorical_indices_after_ohe,
+        random_state=42
+    )
+
+    pipeline = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('smote', smotenc),
+        ('model', model)          # model goes last, always named 'model'
+    ])
+
+    return pipeline
+
+pipeline = Pipeline(steps=[
+    ('preprocessor', preprocessor),   # OHE happens here
+    ('smote', SMOTE(random_state=42)), # all columns are numeric now
+    ('model', model)
+])
+
+best_models = {}
+
+for name, model in models.items():
+    print(f"\nTuning {name}...")
+    pipeline = build_pipeline(model, numeric_features, categorical_features)
+    
+    best_estimator, best_params = randomized_search_cv(
+        pipeline,
+        params_search[name],   # pass model-specific params (bug fix)
+        X_train, y_train
+    )
+    best_models[name] = {
+        'estimator': best_estimator,
+        'params': best_params
+    }
+    print(f"{name} best params: {best_params}")
 
 # impute missing values
 X_train, imputer = unknown_values_replace(X_train, ['default', 'education'])
@@ -105,23 +184,3 @@ X_train_smotenc, y_train_smotenc = smotenc.fit_resample(X_train, y_train)
 
 
 # models training : multiple models with hyperparameters tuning in both ways: Hyperopt and Randomized Search CV
-
-
-
-
-
-"""
-preprocessor = ColumnTransformer(transformers=[
-    ("num", Pipeline([
-        ("imputer", SimpleImputer(strategy="median")),
-        ("scaler", MinMaxScaler())
-    ]), numeric_features),
-    
-    ("cat", Pipeline([
-        ("imputer", SimpleImputer(strategy="most_frequent")), 
-        ("encoder", OneHotEncoder(handle_unknown="ignore"))
-    ]), categorical_features)
-    
-])
-
-"""
