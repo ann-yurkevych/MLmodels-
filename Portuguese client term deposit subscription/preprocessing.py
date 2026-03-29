@@ -83,7 +83,8 @@ def drop_columns(df: pd.DataFrame, columns_to_drop: list):
 
 def numeric_categorical_features(df: pd.DataFrame, target: str = 'y'):
     # returns a list of categorical + numeric features in two different lists
-    df_features = df.drop(columns=[target])
+    
+    df_features = df.drop(columns=[target], errors='ignore')
     return df_features.select_dtypes(include=["number"]).columns.tolist(), df_features.select_dtypes(include=["object"]).columns.tolist()
 
 def unknown_values_replace(df: pd.DataFrame, categories_to_keep: list, imputer=None):

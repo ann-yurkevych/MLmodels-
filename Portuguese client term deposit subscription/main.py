@@ -98,6 +98,11 @@ X_train, y_train = extract_target(X_train, 'y')
 X_validation, y_validation = extract_target(X_validation, 'y') 
 X_test, y_test = extract_target(X_test, 'y') 
 
+# After extract_target, before pipeline
+X_train, imputer = unknown_values_replace(X_train, ['default', 'education'])
+X_validation = unknown_values_replace(X_validation, ['default', 'education'], imputer=imputer)
+X_test = unknown_values_replace(X_test,       ['default', 'education'], imputer=imputer)
+
 # determine numeric, categorical features
 numeric_features, categorical_features = numeric_categorical_features(X_train)
 
@@ -131,10 +136,6 @@ def build_pipeline(model, numeric_features, categorical_features):
 
  
     categorical_transformer = SklearnPipeline(steps=[
-        ('unknown_replacer', FunctionTransformer(
-            unknown_values_replace,
-            kw_args={'categories_to_keep': ['default', 'education']}
-        )),
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False))
     ])
@@ -174,13 +175,13 @@ for name, model in models.items():
 
 # fitting preprocessing on training, transforming on test/validation
 _prep_pipeline = build_pipeline(base_xgboost(), numeric_features, categorical_features)
+_prep_pipeline.named_steps['preprocessor'].fit(X_train, y_train)
 preprocessor_fit = _prep_pipeline.named_steps['preprocessor']
-preprocessor_fit.fit(X_train)
  
 X_train_proc = preprocessor_fit.transform(X_train)
 X_val_proc   = preprocessor_fit.transform(X_validation)
 X_test_proc  = preprocessor_fit.transform(X_test)
- 
+
 # SMOTE on training only
 smote = SMOTE(random_state=42)
 X_train_resampled, y_train_resampled = smote.fit_resample(X_train_proc, y_train)
@@ -274,7 +275,7 @@ def style_body(cell, bold=False, fill=None):
         cell.fill = fill
  
  
-# ── Sheet 1: Summary ────────────────────────────────────────
+
 ws = wb.active
 ws.title = 'Summary'
 ws.freeze_panes = 'A3'
@@ -340,7 +341,7 @@ for col_idx, val in enumerate(test_data, start=1):
     style_body(cell, bold=True, fill=PatternFill('solid', start_color='FFE699'))
  
  
-# ── Sheet 2: ROC Curves ─────────────────────────────────────
+# AUC ROC
 ws_roc = wb.create_sheet('ROC Curves')
 ws_roc['A1'].value = 'ROC Curves — All 12 Models'
 ws_roc['A1'].font  = Font(name='Arial', bold=True, size=13, color='1F3864')

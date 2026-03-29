@@ -17,7 +17,6 @@ params_search = {
     "LogisticRegression": {
         "model__penalty": ["l1", "l2", "elasticnet"],
         "model__C": [0.01, 0.1, 1, 10, 100],
-        "model__solver": ["liblinear"],
         "model__l1_ratio": [0, 0.5, 1],
     },
     

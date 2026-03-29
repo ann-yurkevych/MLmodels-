@@ -26,7 +26,7 @@ def base_KNeighborsClassifier():
 
 # Boosting algorithms: XGBoost, LightGBM, CatBoost
 def base_xgboost():
-    return xgb.XGBClassifier(random_state=42, eval_metric='logloss', use_label_encoder=False)
+    return xgb.XGBClassifier(random_state=42, eval_metric='logloss')
 
 def base_lightgbm():
     return LGBMClassifier(random_state=42, verbose=-1)
