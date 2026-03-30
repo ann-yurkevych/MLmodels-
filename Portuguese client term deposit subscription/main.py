@@ -50,7 +50,7 @@ from sklearn.metrics import (
     roc_auc_score, roc_curve, classification_report
 )
 from evaluation import evaluate_model, build_excel_report
-
+from utils import shap_summary, shap_single_prediction, analyze_errors, feature_importance_tree_based
 """PIPELINE
 1. Load the data. 
 2. Encode the target variable from string to numeric value. 
@@ -155,8 +155,6 @@ def build_pipeline(model, numeric_features, categorical_features):
         ('model', model)          
     ])
 
-
-
 best_models_randomized = {}
 
 for name, model in models.items():
@@ -259,3 +257,17 @@ build_excel_report(
     y_validation          = y_validation,
     output_path           = 'model_results.xlsx',
 )
+
+# extract raw model from pipeline
+best_catboost_pipeline = best_models_randomized['CatBoostClassifier']['estimator']
+catboost_model = best_catboost_pipeline.named_steps['model']
+
+X_train_proc_df = pd.DataFrame(X_train_proc)
+X_test_proc_df  = pd.DataFrame(X_test_proc)
+
+# SHAP — feature impact on predictions
+explainer, shap_values = shap_summary(catboost_model, X_train_proc_df)
+
+# Error analysis
+error_df = analyze_errors(catboost_model, X_test_proc_df, y_test)
+print(error_df.describe())
