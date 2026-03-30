@@ -8,7 +8,7 @@ from catboost import CatBoostClassifier
 from sklearn.metrics import f1_score
 from sklearn.model_selection import RandomizedSearchCV
 from configurations import params_search
-
+from lightgbm import LGBMClassifier, early_stopping, log_evaluation
 
 # RANDOMIZED SEARCH tuning
 def randomized_search_cv(model, model_name, X_train, y_train, n_iter=20, cv=5):
@@ -80,7 +80,7 @@ def tune_lightgbm(X_train, y_train, X_val, y_val, max_evals=20):
         )
         clf.fit(X_train, y_train,
                 eval_set=[(X_val, y_val)],
-                callbacks=[LGBMClassifier.early_stopping(10, verbose=False)])
+                callbacks=[early_stopping(stopping_rounds=10, verbose=False)])
         pred = clf.predict(X_val)
         return {'loss': -f1_score(y_val, pred, average='weighted'), 'status': STATUS_OK}
 
