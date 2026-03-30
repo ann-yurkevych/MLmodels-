@@ -56,4 +56,8 @@ Results are saved to `model_results.xlsx`.
 | LightGBM | RandomizedSearchCV + Hyperopt |
 | CatBoost | RandomizedSearchCV + Hyperopt |
 
-### I chose these 6 models to cover a wide range of approaches. I started with 3 simple models — Decision Tree, Logistic Regression, and KNN — as baselines to have a reference point. If a complex model can't beat a Decision Tree, something is wrong with it. I picked the 3 most popular gradient boosting libraries — XGBoost, LightGBM, and CatBoost. All three are known to perform best on tabular data, but they work differently under the hood, so I wanted to compare them directly on the same dataset and see which one wins. 
+ I chose these 6 models to cover a wide range of approaches. I started with 3 simple models — Decision Tree, Logistic Regression, and KNN — as baselines to have a reference point. If a complex model can't beat a Decision Tree, something is wrong with it. I picked the 3 most popular gradient boosting libraries — XGBoost, LightGBM, and CatBoost. All three are known to perform best on tabular data, but they work differently under the hood, so I wanted to compare them directly on the same dataset and see which one wins. 
+
+## Performance metrics
+
+## 

@@ -238,6 +238,69 @@ def _build_reports_sheet(ws, results, X_val_proc, X_validation, y_validation):
                        end_row=current_row,   end_column=6)
         current_row += 2   # blank line between models
  
+def build_test_report_sheet(ws, best_result, X_test_proc, X_test, y_test):
+    """Populate the Test Set Classification Report sheet for the best model only."""
+    for c in ['A', 'B']:
+        ws.column_dimensions[c].width = 22 if c == 'A' else 18
+    for c in ['C', 'D', 'E', 'F']:
+        ws.column_dimensions[c].width = 14
+
+    ws['A1'].value = f'Test Set Report — Best Model: {best_result["model_name"]} ({best_result["method"]})'
+    ws['A1'].font  = Font(name='Arial', bold=True, size=13, color='1F3864')
+
+    current_row = 3
+
+    # Model header
+    cell = ws.cell(row=current_row, column=1,
+                   value=f"{best_result['model_name']}  [{best_result['method']}]")
+    cell.font      = Font(name='Arial', bold=True, size=11, color='FFFFFF')
+    cell.fill      = HEADER_FILL
+    cell.alignment = LEFT
+    ws.merge_cells(start_row=current_row, start_column=1,
+                   end_row=current_row,   end_column=6)
+    ws.row_dimensions[current_row].height = 20
+    current_row += 1
+
+    # Column headers
+    for ci, ch in enumerate(['Class', 'Precision', 'Recall',
+                              'F1-Score', 'Support', ''], start=1):
+        _style_header(ws.cell(row=current_row, column=ci, value=ch),
+                      fill=PatternFill('solid', start_color='2E75B6'))
+    current_row += 1
+
+    # Predict on test set
+    y_pred_test = (best_result['estimator'].predict(X_test_proc)
+                   if best_result['preprocessed']
+                   else best_result['estimator'].predict(X_test))
+
+    report_dict = classification_report(y_test, y_pred_test, output_dict=True)
+    for class_label, metrics in report_dict.items():
+        if class_label == 'accuracy' or not isinstance(metrics, dict):
+            continue
+        row_fill = ALT_FILL if current_row % 2 == 0 else None
+        for ci, val in enumerate([
+            class_label,
+            round(metrics.get('precision', 0), 4),
+            round(metrics.get('recall',    0), 4),
+            round(metrics.get('f1-score',  0), 4),
+            int(metrics.get('support',     0)),
+            '',
+        ], start=1):
+            _style_body(ws.cell(row=current_row, column=ci, value=val),
+                        fill=row_fill)
+        current_row += 1
+
+    # AUC row
+    y_pred_prob_test = (best_result['estimator'].predict_proba(X_test_proc)[:, 1]
+                        if best_result['preprocessed']
+                        else best_result['estimator'].predict_proba(X_test)[:, 1])
+    auc_cell = ws.cell(row=current_row, column=1,
+                       value=f"ROC AUC: {roc_auc_score(y_test, y_pred_prob_test):.4f}")
+    auc_cell.font      = BOLD_FONT
+    auc_cell.alignment = LEFT
+    auc_cell.fill      = PatternFill('solid', start_color='FFF2CC')
+    ws.merge_cells(start_row=current_row, start_column=1,
+                   end_row=current_row,   end_column=6)
  
 def build_excel_report(
     results,
@@ -250,8 +313,10 @@ def build_excel_report(
     X_val_proc,
     X_validation,
     y_validation,
+    X_test_proc,
+    X_test
     output_path='model_results.xlsx',
-):
+    ):
     """
     Build and save the full Excel workbook with three sheets:
       1. Summary          — all model metrics + test-set row for the winner
@@ -288,6 +353,13 @@ def build_excel_report(
         wb.create_sheet('Classification Reports'),
         results, X_val_proc, X_validation, y_validation,
     )
- 
+
+    build_test_report_sheet(
+        wb.create_sheet('Test Set Report'),
+        best_result, X_test_proc, X_test, y_test,
+    )
+
     wb.save(output_path)
     print(f"\n  Results saved {output_path}")
+
+
