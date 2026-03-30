@@ -36,7 +36,7 @@ def evaluate_model(estimator, X, y_true, model_name, method, preprocessed=False)
         'preprocessed': preprocessed,
     }
 
-HEADER_FILL = PatternFill('solid', start_color='1F3864')   # dark navy
+HEADER_FILL = PatternFill('solid', start_color='1F3864') 
 ALT_FILL    = PatternFill('solid', start_color='D9E1F2')   # light blue
 BEST_FILL   = PatternFill('solid', start_color='E2EFDA')   # light green
 HEADER_FONT = Font(name='Arial', bold=True, color='FFFFFF', size=11)
@@ -290,4 +290,4 @@ def build_excel_report(
     )
  
     wb.save(output_path)
-    print(f"\n  Results saved → {output_path}")
+    print(f"\n  Results saved {output_path}")

@@ -1,4 +1,3 @@
-import mlflow
 import pandas as pd
 import numpy as np
 from imblearn.pipeline import Pipeline
@@ -50,7 +49,7 @@ from sklearn.metrics import (
     f1_score, precision_score, recall_score,
     roc_auc_score, roc_curve, classification_report
 )
-from evaluation import evaluate_model
+from evaluation import evaluate_model, build_excel_report
 
 """PIPELINE
 1. Load the data. 
