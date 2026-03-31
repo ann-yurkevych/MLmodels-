@@ -29,14 +29,6 @@ def load_data(datasets_path: str, file_type: str = "csv", sql_query: str = None,
         df = pd.read_json(datasets_path)         
     elif file_type == "xlsx":
         df = pd.read_excel(datasets_path)         
-    elif file_type == "sql":
-        if connection is None:
-            raise ValueError("A database connection string 'connection' is required for SQL type.")
-        if sql_query is None:
-            raise ValueError("A 'sql_query' is required for SQL type.")
-        engine = create_engine(connection)
-        with engine.connect() as conn:          
-            df = pd.read_sql(sql_query, connection=conn)
     else:
         raise ValueError(f"Unsupported file type: '{file_type}'. Choose from: csv, json, xlsx, sql.")
     

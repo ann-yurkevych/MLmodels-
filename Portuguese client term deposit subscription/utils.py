@@ -23,6 +23,8 @@ def feature_importance_tree_based(model, X):
     plt.ylabel('Importance')
     plt.tight_layout()
     plt.show()
+    plt.savefig('feature_importance.png', bbox_inches='tight', dpi=150)
+    plt.close()
  
     return feature_importance_df
 
@@ -44,7 +46,8 @@ def permutation_feature_importance(model, X, y):
     plt.ylabel('Mean accuracy drop')
     plt.tight_layout()
     plt.show()
- 
+    plt.savefig('feature_importance_permutation.png', bbox_inches='tight', dpi=150)
+    plt.close()
     return feature_importance_df
 
 # THE IMPACT OF FEATURES ON PREDICTIONS
@@ -57,10 +60,12 @@ def shap_summary(model, X_train):
  
     print("── SHAP summary (bar) ──")
     shap.summary_plot(values_class1, X_train, plot_type="bar")
- 
+    plt.savefig('shap_bar.png', bbox_inches='tight', dpi=150)
+    plt.close()
     print("── SHAP summary (beeswarm) ──")
     shap.summary_plot(values_class1, X_train)
- 
+    plt.savefig('shap_beeswarm.png', bbox_inches='tight', dpi=150)
+    plt.close()
     return explainer, shap_values
 
 
@@ -86,13 +91,17 @@ def shap_single_prediction(model, X_train, X_test, row_index=0):
         else explainer.expected_value
     )
  
-    print(f"── SHAP force plot for test record #{row_index} ──")
-    shap.initjs()
-    shap.force_plot(
-        expected_value,
-        values_class1[row_index],
-        X_test.iloc[row_index]
+    shap.waterfall_plot(
+        shap.Explanation(
+            values=values_class1[row_index],
+            base_values=expected_value,
+            data=X_test.iloc[row_index],
+            feature_names=X_test.columns.tolist()
+        ),
+        show=False
     )
+    plt.savefig(f'shap_force_row{row_index}.png', bbox_inches='tight', dpi=150)
+    plt.close()
 
 # ANALYSE THE ERRORS MODEL MADE
 def analyze_errors(model, X_test, y_test):

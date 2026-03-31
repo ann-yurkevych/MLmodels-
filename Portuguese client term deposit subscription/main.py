@@ -246,8 +246,7 @@ build_excel_report(
     X_val_proc            = X_val_proc,
     X_validation          = X_validation,
     y_validation          = y_validation,
-    X_test_proc=X_test_proc,
-    X_test=X_test,
+    
     output_path           = 'model_results.xlsx',
 )
 
@@ -255,12 +254,29 @@ build_excel_report(
 best_catboost_pipeline = best_models_randomized['CatBoostClassifier']['estimator']
 catboost_model = best_catboost_pipeline.named_steps['model']
 
-X_train_proc_df = pd.DataFrame(X_train_proc)
-X_test_proc_df  = pd.DataFrame(X_test_proc)
+# get feature names after preprocessing
+ohe_feature_names = (
+    best_catboost_pipeline
+    .named_steps['preprocessor']
+    .named_transformers_['cat']
+    .named_steps['encoder']
+    .get_feature_names_out(categorical_features)
+    .tolist()
+)
+all_feature_names = numeric_features + ohe_feature_names
+
+X_train_proc_df = pd.DataFrame(X_train_proc, columns=all_feature_names)
+X_test_proc_df  = pd.DataFrame(X_test_proc, columns=all_feature_names)
+
+# 7. Feature importance
+print("\n── Feature Importance ──")
+feature_importance_tree_based(catboost_model, X_train_proc_df)
 
 # SHAP — feature impact on predictions
 explainer, shap_values = shap_summary(catboost_model, X_train_proc_df)
+shap_single_prediction(catboost_model, X_train_proc_df, X_test_proc_df, row_index=0)
 
 # Error analysis
+print("\n── Error Analysis ──")
 error_df = analyze_errors(catboost_model, X_test_proc_df, y_test)
 print(error_df.describe())

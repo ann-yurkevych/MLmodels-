@@ -1,26 +1,26 @@
 # Portuguese client term deposit subscription modeling
 
 ### Predicting client behaviour on subscription rate for a term deposit. 
-
+Exploratory data analysis and followed by it decisions were made in `exploratory.ipynb` file. 
 ## PROJECT STRUCTURE
 Portuguese client term deposit subscription/
 │
 ├── data/
 │   └── bank-additional-full.csv       # Raw dataset
 │
-├── main.py                            # Main pipeline: data prep → tuning → evaluation → Excel export
+├── main.py                            # Main pipeline: data preprocessing, tuning, evaluation, Excel export
 ├── preprocessing.py                   # Data loading, splitting, encoding, feature engineering
-├── classifiers.py                     # Base model definitions (6 models)
+├── classifiers.py                     # Base model definitions
 ├── configurations.py                  # Hyperparameter search spaces
 ├── hyperparameters_tuning.py          # RandomizedSearchCV + Hyperopt Bayesian tuning
 ├── evaluation.py                      # Model evaluation metrics
-├── EDA.py                             # Exploratory data analysis scripts
+├── EDA.py                             # Functions for EDA
 ├── exploration.ipynb                  # EDA notebook
-├── statistical_tests.py               # Statistical significance tests
-├── utils.py                           # Utility functions
+├── statistical_tests.py               # Statistical significance tests: TO BE UPDATED 
+├── utils.py                           # SHAP interpretation, feature importance
 │
 ├── model_results.xlsx                 # Output: metrics, ROC curves, classification reports
-├── requirements.txt                   # Dependencies
+├── requirements.txt                   
 └── README.md
 
 ## INSTALLATION
@@ -60,4 +60,8 @@ Results are saved to `model_results.xlsx`.
 
 ## Performance metrics
 
-## 
+## Feature importance
+
+## SHAP analysis
+
+## How to improve the model based on SHAP analysis?
