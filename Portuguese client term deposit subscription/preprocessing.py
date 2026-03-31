@@ -3,7 +3,6 @@ import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
-from sqlalchemy import create_engine 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import (
     train_test_split,

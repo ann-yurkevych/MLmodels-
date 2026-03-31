@@ -1,20 +1,11 @@
 import pandas as pd
-import numpy as np
 from imblearn.pipeline import Pipeline
-from imblearn.over_sampling import SMOTENC
 from imblearn.over_sampling import SMOTE
 from sklearn.pipeline import Pipeline as SklearnPipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')
-import io
-import openpyxl
-from openpyxl.drawing.image import Image as XLImage
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
+
 
 
 from preprocessing import (
@@ -255,6 +246,8 @@ build_excel_report(
     X_val_proc            = X_val_proc,
     X_validation          = X_validation,
     y_validation          = y_validation,
+    X_test_proc=X_test_proc,
+    X_test=X_test,
     output_path           = 'model_results.xlsx',
 )
 

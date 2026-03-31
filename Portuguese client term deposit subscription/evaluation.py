@@ -18,7 +18,7 @@ def evaluate_model(estimator, X, y_true, model_name, method, preprocessed=False)
     preprocessed=True  → X is already preprocessed (Hyperopt models)
     preprocessed=False → X goes through the full pipeline (RandomizedSearch models)
     """
-    y_pred      = estimator.predict(X)
+    y_pred = estimator.predict(X)
     y_pred_prob = estimator.predict_proba(X)[:, 1]
  
     fpr, tpr, _ = roc_curve(y_true, y_pred_prob)
@@ -314,7 +314,7 @@ def build_excel_report(
     X_validation,
     y_validation,
     X_test_proc,
-    X_test
+    X_test,
     output_path='model_results.xlsx',
     ):
     """
