@@ -246,7 +246,8 @@ build_excel_report(
     X_val_proc            = X_val_proc,
     X_validation          = X_validation,
     y_validation          = y_validation,
-    
+    X_test_proc           = X_test_proc,
+    X_test                = X_test,
     output_path           = 'model_results.xlsx',
 )
 

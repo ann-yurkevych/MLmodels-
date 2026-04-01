@@ -61,7 +61,7 @@ Results are saved to `model_results.xlsx`.
 ## Performance metrics
 
 ## Feature importance
-
+![Feature importance bar plots](Portuguese client term deposit subscription/images/feature_importance.png)
 ## SHAP analysis
-
-## How to improve the model based on SHAP analysis?
+![Alt text](path/to/your/image.png)
+## How to improve the model?

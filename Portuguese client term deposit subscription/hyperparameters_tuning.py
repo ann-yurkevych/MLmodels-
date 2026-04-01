@@ -6,12 +6,13 @@ from sklearn.metrics import accuracy_score
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 from sklearn.metrics import f1_score
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from configurations import params_search
 from lightgbm import LGBMClassifier, early_stopping, log_evaluation
 
 # RANDOMIZED SEARCH tuning
-def randomized_search_cv(model, model_name, X_train, y_train, n_iter=20, cv=5):
+def randomized_search_cv(model, model_name, X_train, y_train, n_iter=20):
+    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
     clf = RandomizedSearchCV(estimator=model, param_distributions=params_search[model_name], n_iter=n_iter, scoring='f1_weighted', cv=cv, random_state=0, n_jobs=-1, refit=True)
     clf.fit(X_train, y_train)
     return clf.best_estimator_, clf.best_params_
@@ -35,6 +36,7 @@ def tune_xgb(X_train, y_train, X_val, y_val, max_evals=20):
             device='cuda',
             early_stopping_rounds=10
         )
+
         clf.fit(X_train, y_train, eval_set=[(X_val, y_val)], verbose=False)
         pred = clf.predict(X_val)
         return {'loss': -f1_score(y_val, pred, average='weighted'), 'status': STATUS_OK}
