@@ -62,7 +62,7 @@ Results are saved to `model_results.xlsx`.
  I chose these 6 models to cover a wide range of approaches. I started with 3 simple models — Decision Tree, Logistic Regression, and KNN — as baselines to have a reference point. If a complex model can't beat a Decision Tree, something is wrong with it. I picked the 3 most popular gradient boosting libraries — XGBoost, LightGBM, and CatBoost. All three are known to perform best on tabular data, but they work differently under the hood, so I wanted to compare them directly on the same dataset and see which one wins. 
 
 ## Performance metrics
-![Feature importance bar plots](Portuguese_client_term_deposit/images/validation_set/AUC_ROC.png)
+![Feature importance bar plots](images/validation_set/AUC_ROC.png)
 
 All boosting models are practically identical. `XGBoost, LightGBM, and CatBoost` — regardless of whether they were tuned with RandomizedSearchCV or Hyperopt — produced curves that overlap almost perfectly, all sitting between 0.80 and 0.802. 
 
@@ -74,7 +74,7 @@ DecisionTree has a strange flat spot around 0.15-0.20 false positive rate. I not
 
 What really struck me was that a very simple Logistic Regression at 0.796 almost perfectly matched the best complex boosting model at 0.802: their curves sit almost on top of each other.
 This tells me that adding more complexity to the model won't help.
-![Models evaluation metrics](Portuguese%20client%20term%20deposit%20subscription/images/test%20set/evaluation_results.png)
+![Models evaluation metrics](images/test_set/evaluation_results.png)
 
 If I were to compare three boosting models tuned with both methods, RandomizedSearchCV consistently matched Hyperopt. 
 
@@ -87,7 +87,7 @@ All models ended up having almost similar hyperparameters for boosting. XGBoost,
 
 `LogisticRegression` achieved 0.7956 AUC: a linear model with essentially one hyperparameter (C=100), when the best boosting models reached ~0.80. (It could mean that complex models don't capture linear relationships).
 
-![LGBMBoost Classifier classification report](Portuguese%20client%20term%20deposit%20subscription/images/test%20set/test-set-LGBMBoost-classification-report.png)
+![LGBMBoost Classifier classification report](images/test_set/test-set-LGBMBoost-classification-report.png)
 
 The weighted F1 of 0.891 looks great but is misleading. That number is heavily influenced by how well the model handles non-subscribers (class 0), which make up the vast majority of the data. If I only look at this number, the model seems excellent, but it hides a much bigger problem underneath.
 
@@ -98,7 +98,7 @@ When the model does predict a subscription, it's right about half the time. Prec
 The model performing slightly better on the test set than validation is a good sign. The fact that it slightly improved, the model genuinely learned real patterns rather than memorizing the training data. It generalizes well to clients it has never seen before.
 The best performance (based on ROC AUC plot) I received from LGBMBoost Classifier. 
 ## Feature importance
-![Feature importance bar plots](Portuguese%20client%20term%20deposit%20subscription/images/SHAP%20analysis/feature_importance.png)
+![Feature importance bar plots](images/shap_analysis/feature_importance.png)
 
 The bar chart shows how much each feature "matters" to the model when making decisions.
 
@@ -108,7 +108,7 @@ Thus the bar plot shows only partially true: favors features with many categorie
 Features near zero (`poutcome_nonexistent`, `default_yes`) I consider as noise and are candidates for removal in future model iterations.
 
 ## SHAP analysis
-![Mean Absolute Impact](Portuguese%20client%20term%20deposit%20subscription/images/SHAP%20analysis/shap_bar.png)
+![Mean Absolute Impact](images/shap_analysis/shap_bar.png)
 
 I found out that two features determined (in general settings) what model learned: `euribor3m` and `campaign`. 
 
@@ -123,7 +123,7 @@ What surprised me most was `campaign` was the second important feature. I expect
 I also can see that everything below these two `contact type`, `month`, `day of week`, `job`, edu`cation reflects patterns rather than client insight. This tells me the current feature set has a ceiling. Better client profiling data financial history, savings behavior, previous product holdings could potentially unlock predictive signals than what's currently available in this dataset.
 
 
-![Direction of Impact](Portuguese%20client%20term%20deposit%20subscription/images/SHAP%20analysis/shap_beeswarm.png)
+![Direction of Impact](images/shap_analysis/shap_beeswarm.png)
 `euribor3m`: High values (red) push strongly negative (left), meaning high interest rates reduce subscription probability. Low values (blue) push positive — clients subscribe more when rates are low. This is economically intuitive.
 
 `campaign`: High values (red, many contacts) strongly push negative — being contacted many times actually hurts conversion, likely indicating client fatigue.
@@ -133,7 +133,7 @@ I also can see that everything below these two `contact type`, `month`, `day of 
 `month_may`: Being in May (red=1) pushes slightly negative — May campaigns underperform other months.
 default_no and default_unknown: Clients with no credit default push slightly positive, unknown default status pushes negative.
 
-![Single Prediction: row 0](Portuguese%20client%20term%20deposit%20subscription/images/SHAP%20analysis/shap_force_row0.png)
+![Single Prediction: row 0](images/shap_analysis/shap_force_row0.png)
 For this specific client, the model was very confident they would not subscribe to a term deposit.
 
 The starting point (average prediction across all clients) was `0.776`, but the final score dropped to `−1.855` — far into "will not subscribe" territory.
